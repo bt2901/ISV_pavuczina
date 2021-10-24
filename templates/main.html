@@ -82,7 +82,7 @@ Majk rěšil ne brati četyridesetu cigaru: proigral fazanu v šahy na žalost.
 
 Hču prěporučiti: gledi pěše Troicky most v gradu Čeljabinsku, žeđam foto za ženu.
 
-По мојему мненју, цел јест цељ. Чи хочеш ли скљанку чаја?
+По мојему мненју, цел јест цељ (цель). Чи хочеш ли скљанку чаја? Я пишу йотированою кирилицею, єрбо не имам клаиватуры.
 </textarea>
 
 <h3>Please select orthography the text should conform to</h3>
@@ -120,6 +120,22 @@ Hču prěporučiti: gledi pěše Troicky most v gradu Čeljabinsku, žeđam foto
   </div>
 </div>
 
+        <!-- initially hidden right-click menu -->
+        <div class="hide" id="ctxMenu">
+            <ul id="ctxMenuOptions">
+                <li>
+                    Opcija 1
+                </li>
+
+                <li>
+                    Opcija 2
+                </li>
+
+                <li>
+                    Opcija 3
+                </li>
+            </ul>
+        </div>
 
 <script>
 // Create an instance of mark.js and pass an argument containing
@@ -154,9 +170,65 @@ function sendData() {
   });
 }
 
+function changeSpelling(event) {
+			const parent_id = event.target.getAttribute('data-parent');
+			console.log(parent_id);
+			let parent_elem = document.getElementById(parent_id);
+			console.log(parent_elem);
+			const correction = event.target.innerHTML;
+			if (parent_elem.classList.contains('fixed')) { 
+				console.log("fixed already");
+				return;
+			}
+			console.log("FIX: " + correction);
+			parent_elem.innerHTML = correction;
+			parent_elem.removeAttribute('data-tooltip');
+			parent_elem.removeAttribute('onclick');
+			parent_elem.classList.remove('one_option');
+			parent_elem.classList.remove('many_options');
+			parent_elem.classList.add('fixed');
+}
+
+
+function alternativeCtxMenu(event) {
+			// event.preventDefault();
+			    // event.target.setAttribute('data-selected', True);
+			    const parent_id = event.target.getAttribute('id');
+			    let correctionList = event.target.getAttribute('data-tooltip');
+			    let ctxMenu = document.getElementById("ctxMenuOptions");
+			    let newChildren = correctionList.split('/').map(x => {
+				// let template = document.createElement("template");        
+				let elementString = '<li data-parent="' + parent_id + '">' + x + '</li>'
+				return elementString;
+				// template.innerHTML = elementString;
+				// template.onclick = changeSpelling;
+				// return template.content.firstChild;
+			    });
+		    	    console.log(ctxMenu);
+			    ctxMenu.replaceChildren();
+			    ctxMenu.onclick = changeSpelling;
+			    // ctxMenu.replaceChildren(...newChildren);
+                            ctxMenu.innerHTML = newChildren.join('\n');
+                            //ctxMenu.replaceChildren(newChildren.join('\n'));
+			    console.log(newChildren);
+			    // let ctxMenu = document.getElementById("ctxMenu");
+			    // ctxMenu.style.display = "block";
+			    // ctxMenu.style.left = (event.pageX - 10)+"px";
+			    // ctxMenu.style.top = (event.pageY - 10)+"px";
+			// this.innerHTML = correction;
+			// this.removeAttribute('data-tooltip');
+			// this.removeAttribute('onclick');
+			// this.removeAttribute('oncontextmenu');
+			// this.classList.remove('one_option');
+			// this.classList.add('fixed');"
+}
+
+// TODO: make this a context menu, maybe?
+// LINK
+// LINK
 
 function renderData(text, spans, corrections) {
-	document.querySelector(".context").textContent = text
+	document.querySelector(".context").innerHTML = text;
 	// mark all unknown words
 	let unk_ranges = spans.filter(entry => entry[2].includes("^")).map(entry => {
 		return {"start": entry[0], "length": entry[1]-entry[0]}
@@ -174,25 +246,18 @@ function renderData(text, spans, corrections) {
 		let single_range = [{"start": entry[0], "length": entry[1]-entry[0]}]
 		let correction = corrections[entry[2] - 1]
 		console.log(correction)
-		if (correction.includes("/")) {
-			markInstance.markRanges(single_range, {
-				className: "many_options", 
-				each: el => {el.setAttribute('data-tooltip', correction)}
-				// each: el => {el.setAttribute('title', correction)}
-			})
-		} else {
-			markInstance.markRanges(single_range, {
-				className: "one_option",
-				each: el => {
-					el.setAttribute('data-tooltip', correction);
-					el.setAttribute('onclick', 
-						"this.innerHTML = '" + correction + "'; this.removeAttribute('data-tooltip'); this.removeAttribute('onclick'); this.classList.remove('one_option'); this.classList.add('fixed');"
-					);
-				}
-			})
-		}
+		markInstance.markRanges(single_range, {
+			className: "many_options", 
+			each: el => {
+				el.id = entry[0]
+				el.setAttribute('data-tooltip', correction);
+				// el.setAttribute('onclick', 'alternativeCtxMenu()');
+				el.onclick = alternativeCtxMenu;
+			}
+		})
 	})
 }
+
 
 </script>
 

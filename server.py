@@ -1,46 +1,30 @@
 import argparse
 from flask import Flask, render_template, request, jsonify
 import pymorphy2
-from example2 import perform_spellcheck
-from constants import DEFAULT_UNITS, SIMPLE_DIACR_SUBS, ETM_DIACR_SUBS, CYR_LETTER_SUBS
+from isv_nlp_utils.constants import create_analyzers_for_every_alphabet
+from isv_nlp_utils.spellcheck import perform_spellcheck
+import time
 
 app = Flask(__name__)
 app.config["JSON_AS_ASCII"] = False
 
-path = "C:\\dev\\pymorphy2-dicts\\"
+abecedas = create_analyzers_for_every_alphabet()
 
-std_morph = pymorphy2.MorphAnalyzer(
-    path+"out_isv_lat",
-    units=DEFAULT_UNITS,
-    char_substitutes=SIMPLE_DIACR_SUBS
-)
-
-etm_morph = pymorphy2.MorphAnalyzer(
-    path+"out_isv_etm",
-    units=DEFAULT_UNITS,
-    char_substitutes=ETM_DIACR_SUBS
-)
-
-cyr_morph = pymorphy2.MorphAnalyzer(
-    path+"out_isv_cyr",
-    units=DEFAULT_UNITS,
-    char_substitutes=CYR_LETTER_SUBS
-)
-
-abecedas = {"lat": std_morph, "etm": etm_morph, "cyr": cyr_morph}
-    
 @app.route('/')
 def index():
     return render_template('main.html')
 
 @app.route('/koriguj', methods=['POST'])
 def korigovanje():
-    text = request.json['text'];
+    start = time.time()
+    text = request.json['text']
     selected_morph = abecedas[request.json["abeceda"]]
-    text, spans, proposed_corrections = perform_spellcheck(text, selected_morph)
+    text, spans, proposed_corrections = perform_spellcheck(text, request.json['abeceda'], selected_morph)
+    end = time.time()
+    print((end - start)/60)
 
     resp = {
-        'text': text,
+        'text': "<p>" + text.replace("\n", "<p> </p>") + '</p>',
         'spans': spans,
         'corrections': proposed_corrections
     }
