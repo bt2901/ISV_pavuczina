@@ -91,17 +91,6 @@ Hču prěporučiti: gledi pěše Troicky most v gradu Čeljabinsku, žeđam foto
 <input type="radio" class="abeceda_select" name="abeceda_select" value="lat" checked /> Standardnoju latiniceju
 <input type="radio" class="abeceda_select" name="abeceda_select" value="etm" /> Etimologičnojų abecedojų
 
-<!--
-<fieldset><table id="zs" border="0">
-	<tbody><tr>
-		<td><input id="zs_0" type="radio" name="zs" value="0"><label for="zs_0">Заглавные</label></td>
-	</tr><tr>
-		<td><input id="zs_1" type="radio" name="zs" value="1"><label for="zs_1">Строчные</label></td>
-	</tr><tr>
-		<td><input id="zs_2" type="radio" name="zs" value="2" checked="checked"><label for="zs_2">Как есть</label></td>
-	</tr>
-</tbody></table></fieldset> -->
-
 <button id="calc" onclick="sendData()">Prověriti pravopis</button>
 
 <div class="panel panel-default">
@@ -165,67 +154,42 @@ async function postData() {
 
 function sendData() {
   postData().then(data => {
-      console.log(data); // JSON data parsed by `data.json()` call
 	  renderData(data['text'], data['spans'], data['corrections'])
   });
 }
 
 function changeSpelling(event) {
-			const parent_id = event.target.getAttribute('data-parent');
-			console.log(parent_id);
-			let parent_elem = document.getElementById(parent_id);
-			console.log(parent_elem);
-			const correction = event.target.innerHTML;
-			if (parent_elem.classList.contains('fixed')) { 
-				console.log("fixed already");
-				return;
-			}
-			console.log("FIX: " + correction);
-			parent_elem.innerHTML = correction;
-			parent_elem.removeAttribute('data-tooltip');
-			parent_elem.removeAttribute('onclick');
-			parent_elem.classList.remove('one_option');
-			parent_elem.classList.remove('many_options');
-			parent_elem.classList.add('fixed');
+	const parent_id = event.target.getAttribute('data-parent');
+	let parent_elem = document.getElementById(parent_id);
+	const correction = event.target.innerHTML;
+	if (parent_elem.classList.contains('fixed')) { 
+		return;
+	}
+	parent_elem.innerHTML = correction;
+	parent_elem.removeAttribute('data-tooltip');
+	parent_elem.removeAttribute('onclick');
+	parent_elem.classList.remove('one_option');
+	parent_elem.classList.remove('many_options');
+	parent_elem.classList.add('fixed');
 }
 
 
 function alternativeCtxMenu(event) {
-			// event.preventDefault();
-			    // event.target.setAttribute('data-selected', True);
-			    const parent_id = event.target.getAttribute('id');
-			    let correctionList = event.target.getAttribute('data-tooltip');
-			    let ctxMenu = document.getElementById("ctxMenuOptions");
-			    let newChildren = correctionList.split('/').map(x => {
-				// let template = document.createElement("template");        
-				let elementString = '<li data-parent="' + parent_id + '">' + x + '</li>'
-				return elementString;
-				// template.innerHTML = elementString;
-				// template.onclick = changeSpelling;
-				// return template.content.firstChild;
-			    });
-		    	    console.log(ctxMenu);
-			    ctxMenu.replaceChildren();
-			    ctxMenu.onclick = changeSpelling;
-			    // ctxMenu.replaceChildren(...newChildren);
-                            ctxMenu.innerHTML = newChildren.join('\n');
-                            //ctxMenu.replaceChildren(newChildren.join('\n'));
-			    console.log(newChildren);
-			    // let ctxMenu = document.getElementById("ctxMenu");
-			    // ctxMenu.style.display = "block";
-			    // ctxMenu.style.left = (event.pageX - 10)+"px";
-			    // ctxMenu.style.top = (event.pageY - 10)+"px";
-			// this.innerHTML = correction;
-			// this.removeAttribute('data-tooltip');
-			// this.removeAttribute('onclick');
-			// this.removeAttribute('oncontextmenu');
-			// this.classList.remove('one_option');
-			// this.classList.add('fixed');"
+    const parent_id = event.target.getAttribute('id');
+    let correctionList = event.target.getAttribute('data-tooltip');
+    let ctxMenu = document.getElementById("ctxMenuOptions");
+    let newChildren = correctionList.split('/').map(x => {
+	let elementString = '<li data-parent="' + parent_id + '">' + x + '</li>'
+	return elementString;
+    });
+    ctxMenu.replaceChildren();
+    ctxMenu.onclick = changeSpelling;
+    ctxMenu.innerHTML = newChildren.join('\n');
 }
 
 // TODO: make this a context menu, maybe?
-// LINK
-// LINK
+// http://jsfiddle.net/a6w7n64o/
+// http://jsfiddle.net/w33z4bo0/1/
 
 function renderData(text, spans, corrections) {
 	document.querySelector(".context").innerHTML = text;
@@ -241,11 +205,9 @@ function renderData(text, spans, corrections) {
 	// })
 	let fixable_ranges = spans.filter(entry => !entry[2].includes("^"))
 	fixable_ranges.forEach(entry => {
-		console.log(entry)
 		// abusing js type coercion 'coz this is stupid prototype
 		let single_range = [{"start": entry[0], "length": entry[1]-entry[0]}]
 		let correction = corrections[entry[2] - 1]
-		console.log(correction)
 		markInstance.markRanges(single_range, {
 			className: "many_options", 
 			each: el => {
