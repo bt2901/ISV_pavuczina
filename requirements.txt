@@ -1,1 +1,2 @@
 flask
+git+https://github.com/bt2901/ISV_NLP_utils

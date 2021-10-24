@@ -69,23 +69,17 @@ mark.many_options {
 </head>
 
 
-<h2>Avtododavanje diakritiky: bazovano na <a href="https://markjs.io/" target="_blank">mark.js</a>, pymorphy2 i Flask</h2>
-
-
-
-
+<h2>Avtododavanje diakritiky i prověrjanje pravopisa: bazovano na <a href="https://markjs.io/" target="_blank">mark.js</a>, <a href="https://github.com/bt2901/ISV_pymorphy2_dicts">pymorphy2</a> i Flask</h2>
 
 <textarea name="text" rows="6" cols="80" id="text" class="v" spellcheck="false">
 Biblioteka pymorphy2 jest napisana za jezyk Python v 2012 letu. Ona imaje nekoliko osoblivostej, ktore delajut jej ukoristanje za MS mnogo uměstnym.
-
-Majk rěšil ne brati četyridesetu cigaru: proigral fazanu v šahy na žalost.
 
 Hču prěporučiti: gledi pěše Troicky most v gradu Čeljabinsku, žeđam foto za ženu.
 
 По мојему мненју, цел јест цељ (цель). Чи хочеш ли скљанку чаја? Я пишу йотированою кирилицею, єрбо не имам клаиватуры.
 </textarea>
 
-<h3>Please select orthography the text should conform to</h3>
+<h3>Izberi, kaky alfabet/pravopis trěbuje byti v tekstu:</h3>
 
 <input type="radio" class="abeceda_select" name="abeceda_select" value="cyr" /> Кирилицеју
 <input type="radio" class="abeceda_select" name="abeceda_select" value="lat" checked /> Standardnoju latiniceju
@@ -96,7 +90,7 @@ Hču prěporučiti: gledi pěše Troicky most v gradu Čeljabinsku, žeđam foto
 <div class="panel panel-default">
   <div class="panel-body">
     <p>
-		<small>The data is obtained from pymorphy2 and rendered in HTML. Some of elements are clickable</small>
+		<small>The data is obtained from pymorphy2 and rendered in HTML. Some of elements are clickable. The source code is available at <a href="https://github.com/bt2901/ISV_pavuczina">GitHub</a></small>
     </p>
   </div>
 </div>
@@ -109,7 +103,7 @@ Hču prěporučiti: gledi pěše Troicky most v gradu Čeljabinsku, žeđam foto
   </div>
 </div>
 
-        <!-- initially hidden right-click menu -->
+<h3>Izberi, kaka opcija pravopisa jest dobroju:</h3>
         <div class="hide" id="ctxMenu">
             <ul id="ctxMenuOptions">
                 <li>
@@ -199,10 +193,6 @@ function renderData(text, spans, corrections) {
 	})
 	markInstance.markRanges(unk_ranges, {"className": "unknown"})
 
-	// mark all words that could be changed easily
-	// let fixable_ranges = spans.filter(entry => !entry[2].includes("^")).map(entry => {
-	// return {"start": entry[0], "length": entry[1]-entry[0]}
-	// })
 	let fixable_ranges = spans.filter(entry => !entry[2].includes("^"))
 	fixable_ranges.forEach(entry => {
 		// abusing js type coercion 'coz this is stupid prototype
@@ -213,7 +203,6 @@ function renderData(text, spans, corrections) {
 			each: el => {
 				el.id = entry[0]
 				el.setAttribute('data-tooltip', correction);
-				// el.setAttribute('onclick', 'alternativeCtxMenu()');
 				el.onclick = alternativeCtxMenu;
 			}
 		})
